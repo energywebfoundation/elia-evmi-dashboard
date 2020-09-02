@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  ocn-node-db:
+    image: postgres:latest
+    container_name: ocn_node_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ocn
+      POSTGRES_PASSWORD: password
+
+  ocn-node:
+    build:
+      context: ./ocn-node
+      dockerfile: Dockerfile
+    image: "ev_device_ocn-node"
+    container_name: ocn_node
+    restart: always
+    ports:
+      - 8080:8080
+    network_mode: "host"
+    depends_on:
+      - ocn-node-db
+
+  msp:
+    build:
+      context: ./ocn-tools
+      dockerfile: Dockerfile
+    image: "ev_device_simulator"
+    container_name: msp_simulation
+    restart: always
+    ports:
+      - 3001:3001
+    network_mode: "host"
+    depends_on:
+      - ocn-node
+    volumes:
+      - /home/ubuntu/ocn-tools/msp.db:/home/node/app/msp.db
+    environment:
+      OCN_IDENTITY: msp_private_key
+      OCN_TOKEN_A: msp_token_a
+    command: ["./wait-for-node.sh", "--msp"]
+
+  cpo:
+    build:
+      context: ./ocn-tools
+      dockerfile: Dockerfile
+    image: "ev_device_simulator"
+    container_name: cpo_simulation
+    restart: always
+    ports:
+      - 3000:3000
+    network_mode: "host"
+    depends_on:
+      - ocn-node
+    volumes:
+      - /home/ubuntu/ocn-tools/cpo.db:/home/node/app/cpo.db
+    environment:
+      OCN_IDENTITY: cpo_private_key
+      OCN_TOKEN_A: cpo_token_a
+    command: ["./wait-for-node.sh", "--cpo"]

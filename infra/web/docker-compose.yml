@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  ocn-node-db:
+    image: postgres:latest
+    container_name: ocn_node_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ocn
+      POSTGRES_PASSWORD: password
+
+  ocn-node:
+    build:
+      context: ./ocn-node
+      dockerfile: Dockerfile
+    image: "ev_device_ocn-node"
+    container_name: ocn_node
+    restart: always
+    ports:
+      - 8080:8080
+    network_mode: "host"
+    depends_on:
+      - ocn-node-db
+
+  flex_backend:
+    build:
+      context: ./flex-backend
+      dockerfile: Dockerfile
+    image: "flex_backend"
+    container_name: flex-backend
+    restart: always
+    ports:
+      # webinterface on localhost:8080
+      - 8080:8080
+      # websocket
+      - 8081:8081
+      # ocn bridge
+      - 8090:8090
+      # mqtt
+      - 1883:1883
+    network_mode: host
+    volumes:
+      - /home/ubuntu/flex-backend/inMemoryDB_EWFlex.json:/home/node/app/inMemoryDB_EWFlex.json
+    environment:
+      OCN_STAGE: volta
+      OCN_IDENTITY: private_key
+      OCN_TOKEN_A: token_a
+    command: ["./wait-for-node.sh"]
