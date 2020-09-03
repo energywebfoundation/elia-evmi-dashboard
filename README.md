@@ -59,7 +59,7 @@ array of session objects: find the session you wish to stop (i.e. one with an
 the above example as both scripts need access to it (signing and sending the 
 id).
 
-### Docker
+### Infra
 
 Infrastructure currently runs on two instances: web (flex) and device
 (msp/cpo simulations).
