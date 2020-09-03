@@ -49,4 +49,4 @@ export SESSION_ID=xxx
 MSP_PRIVATE_KEY=0x123xxx789 node scripts/signatures/generate_start.js | MSP_AUTH_TOKEN=xxx sh scripts/stop_session.sh.js 
 ```
 
-Note the environment variable "SESSION_ID" needs to be sourced from the Flex backend. This can be done using the `get_session.sh` script, which returns an array of session objects: find the session you wish to stop and look for the the `id` field (not `_id`). We export it in the above example as both scripts need access to it (signing and sending the id).
+Note the environment variable "SESSION_ID" needs to be sourced from the Flex backend. This can be done using the `get_session.sh` script, which returns an array of session objects: find the session you wish to stop (i.e. one with an "ACTIVE" status) and look for the the `id` field (not `_id`). We export it in the above example as both scripts need access to it (signing and sending the id).
