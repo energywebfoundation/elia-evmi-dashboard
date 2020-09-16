@@ -70,21 +70,31 @@ id).
 
 These scripts enable the creation of DIDs for business users and their
 managed devices. They are available in the `scripts/identity` directory.
+Here, operations are performed in bulk using an `identities.json` file.
+An example file has been provided, which you should copy:
 
-- Create a business user DID (using the private key configured in the backend):
 ```
-USER_PRIVATE_KEY=0x123xxx789 USER_TYPE=MSP create_user_did.js
+cp identities.example.json identities.json
 ```
 
-Where `USER_TYPE` can be one of: `MSP`, `CPO` or `FLEX`. 
+Populate the users array with the business users you wish to create 
+DIDs for first. 
 
-If successful the user's DID Document (with DID itself included within) will
-be presented in stdout. You can save this by appending `> cpo.json` to the
-command.
+- Create business user DIDs:
+```
+create_user_dids.js
+```
+
+The script will save the newly created DIDs in `identities.json` for each
+entry in the "users" array. Note it will skip the operation if a DID 
+already exists for the user.
 
 - Create a DID for a DER:
+
+*TODO*
+
 ```
-PARENT_DID=did:ethr:0x123xxx789 DER_TYPE=EV create_der_did.js
+create_der_did.js
 ``` 
 
 

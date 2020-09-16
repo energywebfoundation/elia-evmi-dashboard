@@ -1,0 +1,26 @@
+{
+    "users": [
+        {
+            "role": "MSP",
+            "privateKey": "0x0",
+            "did": "will be added by script"
+        },
+        {
+            "role": "CPO",
+            "privateKey": "0x0",
+            "did": "will be added by script"
+        }
+    ],
+    "devices": [
+        {
+            "owner": "did_of_msp (added by script)",
+            "dataPath": "e.g. -> ./devices_ev.json",
+            "dids": ["will be added by script"]
+        },
+        {
+            "owner": "did_of_cpo (added by script)",
+            "dataPath": "e.g. -> ./devices_evse.json",
+            "dids": ["will be added by script"]
+        }
+    ]
+}
