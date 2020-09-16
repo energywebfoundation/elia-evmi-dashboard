@@ -11,6 +11,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@ethersproject/wallet": "^5.0.4",
+    "@ew-did-registry/did": "0.0.1-alpha.573.0",
+    "@ew-did-registry/did-document": "0.0.1-alpha.573.0",
+    "@ew-did-registry/did-ethr-resolver": "0.0.1-alpha.573.0",
+    "@ew-did-registry/did-resolver-interface": "0.0.1-alpha.573.0",
     "@shareandcharge/ocn-notary": "^1.0.0"
-  }
+  },
+  "dependencies": {}
 }
