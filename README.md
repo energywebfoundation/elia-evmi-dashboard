@@ -78,24 +78,38 @@ cp identities.example.json identities.json
 ```
 
 Populate the users array with the business users you wish to create 
-DIDs for first. 
+DIDs for first. Simply add the private key, party id and country code.
+Note the private key should have funds to pay for the DID creation 
+(transaction).
 
 - Create business user DIDs:
 ```
-create_user_dids.js
+node create_user_dids.js
 ```
 
 The script will save the newly created DIDs in `identities.json` for each
 entry in the "users" array. Note it will skip the operation if a DID 
 already exists for the user.
 
-- Create a DID for a DER:
+- Create DIDs for DERs:
 
-*TODO*
+First we must fetch the devices over the OCN. We can do that with the 
+shell scripts in the `charging` directory. We want to place our cached
+data in the `identity` directory for our DID script to read it.
 
 ```
-create_der_did.js
-``` 
+sh scripts/charging/get_tokens.sh > scripts/identity/devices_msp.json
+sh scripts/charging/get_locations.sh > scripts/identity/devices_cpo.json
+```
+
+Now that we have our device data, we can create their DIDs. Simply run:
+
+```
+node create_device_did.js
+```
+
+The script will read the users, find their devices from our data files,
+create their keypair and DID. The output can be found in `identities.json`. 
 
 
 ### Infra

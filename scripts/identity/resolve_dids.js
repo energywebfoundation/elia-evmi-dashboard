@@ -1,4 +1,4 @@
-const { address1056, abi1056, Operator, Resolver } = require('@ew-did-registry/did-ethr-resolver');
+const { address1056, abi1056, Resolver } = require('@ew-did-registry/did-ethr-resolver');
 const { ProviderTypes } = require('@ew-did-registry/did-resolver-interface');
 const { users } = require('./identities.json')
 

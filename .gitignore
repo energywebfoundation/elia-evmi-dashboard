@@ -1,2 +1,4 @@
 /node_modules/
 identities.json
+devices_cpo.json
+devices_msp.json
