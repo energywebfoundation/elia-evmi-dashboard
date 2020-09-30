@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "role": "MSP",
+      "countryCode": "DE",
+      "partyId": "EVM",
+      "privateKey": "hex-encoded ethereum private key",
+      "did": "will be added by script"
+    },
+    {
+      "role": "CPO",
+      "countryCode": "DE",
+      "partyId": "EVC",
+      "privateKey": "hex-encoded ethereum private key",
+      "did": "will be added by script"
+    }
+  ]
+}

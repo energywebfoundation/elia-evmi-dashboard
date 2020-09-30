@@ -1,1 +1,3 @@
 /node_modules/
+scripts/identity/*.json
+!scripts/identity/identites.example.json
