@@ -9,27 +9,25 @@ const locations = require('./devices_cpo.json')
 const tokens = require('./devices_msp.json')
 
 const main = async () => {
-    // const updatedDevices = [...devices]
+    const devicesCopy = JSON.parse(JSON.stringify(devices || {}))
     for (user of users) {
+        const logPrefix = `${user.countryCode}:${user.partyId}`
     
         if (!user.did || !user.did.startsWith('did:ethr:')) {
-            console.log(`did for user ${user.country_code}:${user.party_id} not yet created, skipping...`)
+            console.log(`No did found for ${logPrefix}, skipping...`)
             continue
         }
 
         // get and filter owned devices
         const belongsToMe = (device => 
-            device.country_code === user.country_code 
-            && device.party_id === user.party_id)
+            device.country_code === user.countryCode 
+            && device.party_id === user.partyId)
 
         const userDevices = user.role === 'MSP'
             ? tokens.filter(belongsToMe)
             : locations.filter(belongsToMe)
 
-        console.log(`creating did for user ${user.country_code}:${user.party_id} devices:`)
-        console.log(userDevices.map(device => device.id || device.uid))
-
-
+        console.log(`Creating device dids for ${logPrefix}`)
         
         const userKeys = new Keys({ privateKey: user.privateKey })
         const operator = new Operator(userKeys, {
@@ -40,16 +38,21 @@ const main = async () => {
             abi: abi1056,
             address: address1056
         })
+
+        const userDid = `did:ethr:${userKeys.getAddress()}`
+        if (!devicesCopy[userDid]) {
+            devicesCopy[userDid] = []
+        }
         
         for (device of userDevices) {
+            const deviceId = device.id || device.uid
             
             // check device not already created
-            const existent = devices[`did:ethr:${userKeys.getAddress()}`].find(registeredDevice => 
-                registeredDevice.id === device.id 
-                || registeredDevice.uid === device.id)
+            const existent = devicesCopy[userDid]
+                .find(registeredDevice => registeredDevice.id === deviceId)
 
             if (existent && existent.did && existent.did.startsWith('did:ethr:')) {
-                console.log('device already registered, skipping...')
+                console.log(`Device ${deviceId} already registered, skipping...`)
                 continue
             }
             
@@ -58,30 +61,30 @@ const main = async () => {
             const addr = deviceKeys.getAddress()
             const did = `did:ethr:${addr}`
             
-            console.log(`creating did ${did} for ${device.id || device.uid} owned by did:ethr:${userKeys.getAddress()}`)
-
+            console.log(`Creating did for ${deviceId} owned by ${logPrefix}`)
             
             // create did document
             const document = new DIDDocumentFull(did, operator)
-            console.log(document)
-            // const created = await document.create()
-            // if (created) {
-            //     console.log(`did created for device of ${user.country_code}:${user.party_id} ${addr}`)
-            //     updatedUsers[index].did = did
-            // } else {
-            //     console.log(`unable to create ${did}`)
-            // }
+            const created = await document.create()
+            if (created) {
+                console.log(`Created did for ${deviceId} (${did})`)
+                devicesCopy[userDid].push({
+                    id: deviceId,
+                    privateKey: deviceKeys.privateKey,
+                    did
+                })
+            } else {
+                console.log(`Unable to create did for ${deviceId}`)
+            }
         }
-        
-        
     }
-    return
+    return devicesCopy
 }
 
 main()
-    // .then(updatedDevices => writeFileSync(
-    //         join(__dirname, './identities.json'), 
-    //         JSON.stringify({ users, devices: updatedDevices }, null, 2)
-    //     )
-    // )
+    .then(updatedDevices => writeFileSync(
+            join(__dirname, './identities.json'), 
+            JSON.stringify({ users, devices: updatedDevices }, null, 2)
+        )
+    )
     

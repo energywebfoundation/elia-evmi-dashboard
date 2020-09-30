@@ -4,17 +4,20 @@ const { address1056, abi1056, Operator } = require('@ew-did-registry/did-ethr-re
 const { DIDDocumentFull } = require('@ew-did-registry/did-document')
 const { ProviderTypes } = require('@ew-did-registry/did-resolver-interface');
 const { Keys } = require('@ew-did-registry/keys')
-const { users } = require('./identities.json');
+const { users, devices } = require('./identities.json');
 
 
 const main = async () => {
-    const updatedUsers = [...users]
+    const updatedUsers = JSON.parse(JSON.stringify(users))
     for ([index, user] of users.entries()) {
+        const logId = `${user.countryCode}:${user.partyId}`
     
         if (user.did && user.did.startsWith('did:ethr:')) {
-            console.log(`Found ${user.did}, skipping...`)
+            console.log(`Found ${logId} (${user.did}), skipping...`)
             continue
         }
+
+        console.log(`Creating did for ${logPrefix}`)
         
         const keys = new Keys({ privateKey: user.privateKey })
         const addr = keys.getAddress()
@@ -32,10 +35,10 @@ const main = async () => {
         const document = new DIDDocumentFull(did, operator)
         const created = await document.create()
         if (created) {
-            console.log(`did created for ${user.role} ${addr}`)
+            console.log(`Created did for ${logPrefix} (${did})`)
             updatedUsers[index].did = did
         } else {
-            console.log(`unable to create ${did}`)
+            console.log(`Unable to create did for ${logPrefix}`)
         }
     }
     return updatedUsers
@@ -44,7 +47,7 @@ const main = async () => {
 main()
     .then(updatedUsers => writeFileSync(
             join(__dirname, './identities.json'), 
-            JSON.stringify({ users: updatedUsers }, null, 2)
+            JSON.stringify({ users: updatedUsers, devices }, null, 2)
         )
     )
     

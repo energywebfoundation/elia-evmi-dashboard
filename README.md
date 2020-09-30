@@ -82,16 +82,23 @@ DIDs for first. Simply add the private key, party id and country code.
 Note the private key should have funds to pay for the DID creation 
 (transaction).
 
-- Create business user DIDs:
+**Create business user DIDs**
 ```
-node create_user_dids.js
+node 00_users_create.js
 ```
 
 The script will save the newly created DIDs in `identities.json` for each
 entry in the "users" array. Note it will skip the operation if a DID 
 already exists for the user.
 
-- Create DIDs for DERs:
+**Resolve user DID documents**
+
+To fetch the stored docuemnts, run the script:
+```
+node 01_users_resolve.js
+```
+
+**Create DIDs for DERs**
 
 First we must fetch the devices over the OCN. We can do that with the 
 shell scripts in the `charging` directory. We want to place our cached
@@ -105,11 +112,18 @@ sh scripts/charging/get_locations.sh > scripts/identity/devices_cpo.json
 Now that we have our device data, we can create their DIDs. Simply run:
 
 ```
-node create_device_did.js
+node 10_devices_create.js
 ```
 
 The script will read the users, find their devices from our data files,
-create their keypair and DID. The output can be found in `identities.json`. 
+create their keypair and DID. The output can be found in `identities.json`.
+
+**Resolve device DID documents**
+
+To fetch the stored documents, run:
+```
+11_devices_resolve.js
+```
 
 
 ### Infra

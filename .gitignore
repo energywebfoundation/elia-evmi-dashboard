@@ -1,4 +1,3 @@
 /node_modules/
-identities.json
-devices_cpo.json
-devices_msp.json
+scripts/identity/*.json
+!scripts/identity/identites.example.json
