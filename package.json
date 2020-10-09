@@ -11,10 +11,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@ew-did-registry/did-document": "0.0.1-alpha.573.0",
-    "@ew-did-registry/did-ethr-resolver": "0.0.1-alpha.573.0",
-    "@ew-did-registry/did-resolver-interface": "0.0.1-alpha.573.0",
-    "@ew-did-registry/keys": "0.0.1-alpha.573.0",
+    "@ew-did-registry/claims": "prerelease",
+    "@ew-did-registry/did-document": "prerelease",
+    "@ew-did-registry/did-ethr-resolver": "prerelease",
+    "@ew-did-registry/did-ipfs-store": "prerelease",
+    "@ew-did-registry/did-registry": "prerelease",
+    "@ew-did-registry/did-resolver-interface": "prerelease",
+    "@ew-did-registry/keys": "prerelease",
     "@shareandcharge/ocn-notary": "^1.0.0"
   },
   "dependencies": {}
