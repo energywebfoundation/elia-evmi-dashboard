@@ -93,29 +93,30 @@ services:
             OCN_NODE_KEY: randomkey
         command: ['./wait-for-node.dev.sh', '--cpo']
 
-    # flex-backend:
-    #     # management of devies in flexibility market
-    #     container_name: flex-backend
-    #     build: 
-    #         context: ../flex-backend
-    #         dockerfile: Dockerfile
-    #     image: flex-backend
-    #     restart: always
-    #     ports:
-    #         - '8080:8080'
-    #         - '8081:8081'
-    #         - '8090:8090'
-    #         - '1883:1883'
-    #     networks:
-    #         elia-dev-net:
-    #             ipv4_address: 172.168.238.50
-    #     environment: 
-    #         OCN_STAGE: local
-    #         OCN_IDENTITY: '0x659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63'
-    #         OCN_NODE_KEY: randomkey
-    #     command: ['./wait-for-node.dev.sh']
+    flex-backend:
+        # management of devices in flexibility market
+        container_name: flex-backend
+        build: 
+            context: ../flex-backend
+            dockerfile: Dockerfile
+        image: flex-backend
+        restart: always
+        ports:
+            - '8080:8080'
+            - '8081:8081'
+            - '8090:8090'
+            - '1883:1883'
+        networks:
+            elia-dev-net:
+                ipv4_address: 172.16.238.50
+        environment: 
+            OCN_BRIDGE_URL: http://172.16.238.50:8090
+            OCN_NODE_URL: http://172.16.238.20:8080
+            OCN_IDENTITY: '0x659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63'
+            OCN_NODE_KEY: randomkey
+        command: ['./wait-for-node.dev.sh']
 
-
+    # TODO: update ocn-tools to make CPO automatically agree to FLX permissions
     
 networks:
     # should all run within network with only flex-backend port exposed
