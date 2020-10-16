@@ -6,7 +6,12 @@ PoC.
 ## Maintainer
 - Adam Staveley (`@adamstaveley`)
 
+
 ## Usage
+
+### Registry contract
+
+ABI and Address of contract deployed on Volta can be found in `contracts/evd-registry.json`
 
 ### Scripts
 
