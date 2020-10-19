@@ -32,6 +32,24 @@ services:
         networks: 
             - elia-dev-net
 
+    evd-registry:
+        # deploys ev dashboard registry smart contract
+        container_name: evd-registry-deploy
+        depends_on: 
+            - ganache
+            - ocn-registry
+            - ocn-node # waits on ocn-node to be sure ocn-registry is deployed
+        build:
+            context: ./contracts
+            dockerfile: Dockerfile
+        environment:
+            JSON_RPC_URL: http://172.16.238.10:8544
+            DEPLOYER_KEY: '0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3'
+            OCN_NODE_URL: http://172.16.238.20:8080
+            OCN_REGISTRY_ADDRESS: '0x345ca3e014aaf5dca488057592ee47305d9b3e10'
+        networks:
+            - elia-dev-net
+
     ocn-node:
         # node used by all parties (note: in-memory database)
         container_name: ocn-node
@@ -70,7 +88,8 @@ services:
         networks: 
             elia-dev-net:
                 ipv4_address: 172.16.238.30
-        environment: 
+        environment:
+            OCN_NODE_URL: http://172.16.238.20:8080
             OCN_IDENTITY: '0xc88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c'
             OCN_NODE_KEY: randomkey
         command: ['./wait-for-node.dev.sh', '--msp']
@@ -89,6 +108,7 @@ services:
             elia-dev-net:
                 ipv4_address: 172.16.238.40
         environment:
+            OCN_NODE_URL: http://172.16.238.20:8080
             OCN_IDENTITY: '0x388c684f0ba1ef5017716adb5d21a053ea8e90277d0868337519f97bede61418'
             OCN_NODE_KEY: randomkey
         command: ['./wait-for-node.dev.sh', '--cpo']
@@ -99,7 +119,7 @@ services:
         build: 
             context: ../flex-backend
             dockerfile: Dockerfile
-        image: flex-backend
+        image: ew_flex_backend
         restart: always
         ports:
             - '8080:8080'
@@ -114,12 +134,12 @@ services:
             OCN_NODE_URL: http://172.16.238.20:8080
             OCN_IDENTITY: '0x659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63'
             OCN_NODE_KEY: randomkey
+            EV_REGISTRY_ADDRESS: '0x9FBDa871d559710256a2502A2517b794B482Db40'
+            EV_REGISTRY_PROVIDER: http://172.16.238.10:8544
         command: ['./wait-for-node.dev.sh']
-
-    # TODO: update ocn-tools to make CPO automatically agree to FLX permissions
     
 networks:
-    # should all run within network with only flex-backend port exposed
+    # should all run within network with only flex-backend ports exposed
     elia-dev-net:
         ipam:
             driver: default
