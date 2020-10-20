@@ -9,6 +9,30 @@ PoC.
 
 ## Usage
 
+### Dev environment
+
+Use the `docker-compose.dev.yml` config to spin up a local blockchain, OCN and
+Flex backend for development.
+
+You should have a directory containing `elia-poc`, `flex-backend` and `ocn-tools`:
+```sh
+git clone git@github.com:energywebfoundation/elia-poc.git
+git clone --branch ocn-bridge-component git@github.com:energywebfoundation/flex-backend.git
+git clone --branch ev-dashboard-simulators git@github.com:energywebfoundation/ocn-tools.git
+``` 
+
+Additionally the `ocn-tools` repository needs minor setup:
+```sh
+cd ocn-tools
+cp src/config/config.docker.ts src/config/config.ts
+```
+
+Once ready, run `docker-compose`:
+
+```
+docker-compose -f docker-compose.dev.yml up
+```
+
 ### Registry contract
 
 ABI and Address of contract deployed on Volta can be found in `contracts/evd-registry.json`

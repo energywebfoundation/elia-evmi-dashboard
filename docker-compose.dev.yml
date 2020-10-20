@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+
+    ganache:
+        # our local blockchain
+        container_name: ganache
+        image: 'trufflesuite/ganache-cli'
+        ports:
+            - '8544:8544'
+        networks:
+            elia-dev-net:
+                ipv4_address: 172.16.238.10
+        command: [
+            "-m",
+            "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
+            "--port",
+            "8544",
+            "--accounts",
+            "20",
+            "--networkId=9",
+            "--gasPrice=1",
+            "--gasLimit=10000000"
+        ]
+
+    ocn-registry:
+        # deploys registry smart contracts
+        container_name: ocn-registry-deploy
+        depends_on: 
+            - ganache
+        image: 'openchargingnetwork/ocn-registry-deployer'
+        networks: 
+            - elia-dev-net
+
+    evd-registry:
+        # deploys ev dashboard registry smart contract
+        container_name: evd-registry-deploy
+        depends_on: 
+            - ganache
+            - ocn-registry
+            - ocn-node # waits on ocn-node to be sure ocn-registry is deployed
+        build:
+            context: ./contracts
+            dockerfile: Dockerfile
+        environment:
+            JSON_RPC_URL: http://172.16.238.10:8544
+            DEPLOYER_KEY: '0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3'
+            OCN_NODE_URL: http://172.16.238.20:8080
+            OCN_REGISTRY_ADDRESS: '0x345ca3e014aaf5dca488057592ee47305d9b3e10'
+        networks:
+            - elia-dev-net
+
+    ocn-node:
+        # node used by all parties (note: in-memory database)
+        container_name: ocn-node
+        image: 'openchargingnetwork/ocn-node:1.1.0'
+        depends_on: 
+            - ocn-registry
+        networks: 
+            elia-dev-net:
+                ipv4_address: 172.16.238.20
+        command: [
+            "java",
+            "-Dlogging.level.web=INFO",
+            "-Docn.node.dev=true",
+            "-Docn.node.signatures=false",
+            "-Docn.node.url=http://172.16.238.20:8080",
+            "-Docn.node.apikey=randomkey",
+            "-Docn.node.web3.provider=http://172.16.238.10:8544",
+            "-Docn.node.web3.contracts.registry=0x345cA3e014Aaf5dcA488057592ee47305D9B3e10",
+            "-Docn.node.web3.contracts.permissions=0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
+            "-Docn.node.stillAliveEnabled=false",
+            "-Docn.node.plannedPartySearchEnabled=false",
+            "-jar",
+            "./libs/ocn-node-1.1.0.jar"
+        ]
+
+    msp-simulation:
+        # msp providing access to vehicles (depends on ocn-tools repository)
+        container_name: msp-simulation
+        build:
+            context: ../ocn-tools
+            dockerfile: Dockerfile
+        image: ocn-tools
+        restart: always
+        depends_on:
+            - ocn-node
+        networks: 
+            elia-dev-net:
+                ipv4_address: 172.16.238.30
+        environment:
+            OCN_NODE_URL: http://172.16.238.20:8080
+            OCN_IDENTITY: '0xc88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c'
+            OCN_NODE_KEY: randomkey
+        command: ['./wait-for-node.dev.sh', '--msp']
+
+    cpo-simulation:
+        # cpo providing access to charge points (depends on ocn-tools repository)
+        container_name: cpo-simulation
+        build:
+            context: ../ocn-tools
+            dockerfile: Dockerfile
+        image: ocn-tools
+        restart: always
+        depends_on: 
+            - ocn-node
+        networks:
+            elia-dev-net:
+                ipv4_address: 172.16.238.40
+        environment:
+            OCN_NODE_URL: http://172.16.238.20:8080
+            OCN_IDENTITY: '0x388c684f0ba1ef5017716adb5d21a053ea8e90277d0868337519f97bede61418'
+            OCN_NODE_KEY: randomkey
+        command: ['./wait-for-node.dev.sh', '--cpo']
+
+    flex-backend:
+        # management of devices in flexibility market
+        container_name: flex-backend
+        build: 
+            context: ../flex-backend
+            dockerfile: Dockerfile
+        image: ew_flex_backend
+        restart: always
+        ports:
+            - '8080:8080'
+            - '8081:8081'
+            - '8090:8090'
+            - '1883:1883'
+        networks:
+            elia-dev-net:
+                ipv4_address: 172.16.238.50
+        environment: 
+            OCN_BRIDGE_URL: http://172.16.238.50:8090
+            OCN_NODE_URL: http://172.16.238.20:8080
+            OCN_IDENTITY: '0x659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63'
+            OCN_NODE_KEY: randomkey
+            EV_REGISTRY_ADDRESS: '0x9FBDa871d559710256a2502A2517b794B482Db40'
+            EV_REGISTRY_PROVIDER: http://172.16.238.10:8544
+        command: ['./wait-for-node.dev.sh']
+    
+networks:
+    # should all run within network with only flex-backend ports exposed
+    elia-dev-net:
+        ipam:
+            driver: default
+            config:
+                - subnet: '172.16.238.0/24'
