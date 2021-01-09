@@ -14,11 +14,12 @@ PoC.
 Use the `docker-compose.dev.yml` config to spin up a local blockchain, OCN and
 Flex backend for development.
 
-You should have a directory containing `elia-poc`, `flex-backend` and `ocn-tools`:
+You should have a directory containing `elia-poc`, `flex-backend`, `ocn-tools` and `iam-cache-server`:
 ```sh
 git clone git@github.com:energywebfoundation/elia-poc.git
 git clone --branch ocn-bridge-component git@github.com:energywebfoundation/flex-backend.git
 git clone --branch ev-dashboard-simulators git@github.com:energywebfoundation/ocn-tools.git
+git clone git@github.com:energywebfoundation/iam-cache-server.git
 ``` 
 
 Additionally the `ocn-tools` repository needs minor setup:
@@ -27,11 +28,34 @@ cd ocn-tools
 cp src/config/config.docker.ts src/config/config.ts
 ```
 
-Once ready, run `docker-compose`:
+Next, setup the `iam-cache-server` for development as per its README.
+
+Once ready, run `docker-compose` to start up the iam-cache-server and elia-poc:
 
 ```
+cd iam-cache-server
+docker-compose -f docker-compose.dev.yml up
+cd -
 docker-compose -f docker-compose.dev.yml up
 ```
+
+Diagram of dev setup on local machine:
+```
+                           +-----------------------+
+                           | ev dashboard frontend |
+                           +-----------+---------+-+
++-----------------------+              |         |
+|elia-poc docker compose+<-------------+   +-----v---------------------------+
+|  ganache-cli          |                  | iam-cache-server docker compose |
+|  ocn-registry         |                  |   iam-cache-server app          |
+|  evd-registry         |                  |   dgraph ratel                  |
+|  ocn node             +----------------->+   dgraph zero                   |
+|  msp simulation       |                  |   dgraph alpha                  |
+|  cpo simulation       |                  |   nats                          |
+|  flex backend         |                  |   redis                         |
++-----------------------+                  +---------------------------------+
+```
+
 
 ### Registry contract
 

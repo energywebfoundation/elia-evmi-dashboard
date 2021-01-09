@@ -122,7 +122,7 @@ services:
         image: ew_flex_backend
         restart: always
         ports:
-            - '8080:8080'
+            - '8111:8080'
             - '8081:8081'
             - '8090:8090'
             - '1883:1883'
@@ -137,7 +137,7 @@ services:
             EV_REGISTRY_ADDRESS: '0x9FBDa871d559710256a2502A2517b794B482Db40'
             EV_REGISTRY_PROVIDER: http://172.16.238.10:8544
         command: ['./wait-for-node.dev.sh']
-    
+     
 networks:
     # should all run within network with only flex-backend ports exposed
     elia-dev-net:
