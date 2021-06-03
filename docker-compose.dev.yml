@@ -92,6 +92,7 @@ services:
             OCN_NODE_URL: http://172.16.238.20:8080
             OCN_IDENTITY: '0xc88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c'
             OCN_NODE_KEY: randomkey
+            MSP_CREATE_DIDS: "false"
         command: ['./wait-for-node.dev.sh', '--msp']
 
     cpo-simulation:
@@ -111,6 +112,7 @@ services:
             OCN_NODE_URL: http://172.16.238.20:8080
             OCN_IDENTITY: '0x388c684f0ba1ef5017716adb5d21a053ea8e90277d0868337519f97bede61418'
             OCN_NODE_KEY: randomkey
+            CPO_CREATE_DIDS: "false"
         command: ['./wait-for-node.dev.sh', '--cpo']
 
     flex-backend:
@@ -136,6 +138,7 @@ services:
             OCN_NODE_KEY: randomkey
             EV_REGISTRY_ADDRESS: '0x9FBDa871d559710256a2502A2517b794B482Db40'
             EV_REGISTRY_PROVIDER: http://172.16.238.10:8544
+            DE_EVM_API_TOKEN: "Token 1f590e5cbe12acf5a781be66e7a5e4f7e854b9e682ae83983f0aafb0e0a64e24"
         command: ['./wait-for-node.dev.sh']
      
 networks:

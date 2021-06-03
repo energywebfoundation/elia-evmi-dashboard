@@ -39,6 +39,13 @@ cd -
 docker-compose -f docker-compose.dev.yml up
 ```
 
+After docker compose setup is running in steady-state:
+```
+chmod +x scripts/register-users.sh scripts/register-device.sh
+./register-users.sh
+./register-device.sh
+```
+
 Diagram of dev setup on local machine:
 ```
                            +-----------------------+
@@ -48,11 +55,11 @@ Diagram of dev setup on local machine:
 |elia-poc docker compose+<-------------+   +-----v---------------------------+
 |  ganache-cli          |                  | iam-cache-server docker compose |
 |  ocn-registry         |                  |   iam-cache-server app          |
-|  evd-registry         |                  |   dgraph ratel                  |
-|  ocn node             +----------------->+   dgraph zero                   |
-|  msp simulation       |                  |   dgraph alpha                  |
-|  cpo simulation       |                  |   nats                          |
-|  flex backend         |                  |   redis                         |
+|  evd-registry         |                  |   nats                          |
+|  ocn node             +----------------->+   redis                         |
+|  msp simulation       |                  |   postgres                      |
+|  cpo simulation       |                  |                                 |
+|  flex backend         |                  |                                 |
 +-----------------------+                  +---------------------------------+
 ```
 
