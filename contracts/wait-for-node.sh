@@ -7,5 +7,5 @@ until $(curl $curl_opts $OCN_NODE_URL/health); do
     sleep 5
 done
 
-printf 'node is up'
+printf 'node is up\n'
 node deploy.js

@@ -26,16 +26,16 @@ services:
     ocn-registry:
         # deploys registry smart contracts
         container_name: ocn-registry-deploy
-        depends_on: 
+        depends_on:
             - ganache
         image: 'openchargingnetwork/ocn-registry-deployer'
-        networks: 
+        networks:
             - elia-dev-net
 
     evd-registry:
         # deploys ev dashboard registry smart contract
         container_name: evd-registry-deploy
-        depends_on: 
+        depends_on:
             - ganache
             - ocn-registry
             - ocn-node # waits on ocn-node to be sure ocn-registry is deployed
@@ -54,9 +54,9 @@ services:
         # node used by all parties (note: in-memory database)
         container_name: ocn-node
         image: 'openchargingnetwork/ocn-node:1.1.0'
-        depends_on: 
+        depends_on:
             - ocn-registry
-        networks: 
+        networks:
             elia-dev-net:
                 ipv4_address: 172.16.238.20
         command: [
@@ -80,73 +80,105 @@ services:
         container_name: msp-simulation
         build:
             context: ../ocn-tools
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile.dev
         image: ocn-tools
         restart: always
         depends_on:
             - ocn-node
-        networks: 
+        volumes:
+            - type: bind
+              source: ../ocn-tools/src
+              target: /home/node/app/src
+        networks:
             elia-dev-net:
                 ipv4_address: 172.16.238.30
         environment:
             OCN_NODE_URL: http://172.16.238.20:8080
-            OCN_IDENTITY: '0xc88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c'
+            OCN_IDENTITY: '0x49b2e2b48cfc25fda1d1cbdb2197b83902142c6da502dcf1871c628ea524f11b'
             OCN_NODE_KEY: randomkey
-            MSP_CREATE_DIDS: "false"
-        command: ['./wait-for-node.dev.sh', '--msp']
+            OCN_STAGE: docker
+        command: ['./wait-for-node.dev.sh', 'start-msp']
 
     cpo-simulation:
         # cpo providing access to charge points (depends on ocn-tools repository)
         container_name: cpo-simulation
         build:
             context: ../ocn-tools
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile.dev
         image: ocn-tools
         restart: always
-        depends_on: 
+        depends_on:
             - ocn-node
+        volumes:
+            - type: bind
+              source: ../ocn-tools/src
+              target: /home/node/app/src
         networks:
             elia-dev-net:
                 ipv4_address: 172.16.238.40
         environment:
             OCN_NODE_URL: http://172.16.238.20:8080
-            OCN_IDENTITY: '0x388c684f0ba1ef5017716adb5d21a053ea8e90277d0868337519f97bede61418'
+            OCN_IDENTITY: '0x737f5c61de545d32059ce6d5bc72f7d34b9963310adde62ef0f26621266b65dc'
             OCN_NODE_KEY: randomkey
-            CPO_CREATE_DIDS: "false"
-            ASSET_CACHE_SERVER_URL: "https://identitycache-dev.energyweb.org/"
-            USER_CACHE_SERVER_URL: "https://identitycache-dev.energyweb.org/"
-            NATS_SERVER_URL: "identityevents-dev-nats.energyweb.org"
-        command: ['./wait-for-node.dev.sh', '--cpo']
+            OCN_STAGE: docker
+        command: ['./wait-for-node.dev.sh', 'start-cpo']
 
-    flex-backend:
-        # management of devices in flexibility market
-        container_name: flex-backend
-        build: 
-            context: ../flex-backend
-            dockerfile: Dockerfile
-        image: ew_flex_backend
+    ev-dashboard-backend-db:
+        image: postgres:latest
+        container_name: ev-dashboard-db
         restart: always
         ports:
-            - '8111:8080'
-            - '8081:8081'
+            - 5432:5432
+        networks:
+            elia-dev-net:
+                ipv4_address: 172.16.238.51
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+            POSTGRES_HOST: db
+
+    ev-dashboard-backend:
+        container_name: ev-dashboard-backend
+        build:
+            context: ../ev-dashboard-backend
+            dockerfile: Dockerfile.dev
+        image: evd_backend
+        restart: always
+        ports:
+            - '8111:3000'
             - '8090:8090'
-            - '1883:1883'
+        depends_on:
+            - ev-dashboard-backend-db
+        volumes:
+            - type: bind
+              source: ../ev-dashboard-backend
+              target: /home/node/app
         networks:
             elia-dev-net:
                 ipv4_address: 172.16.238.50
-        environment: 
+        environment:
+            SERVER_PORT: 3000
+            LOG_LEVEL: info
+            OCN_BRIDGE_PORT: 8090
             OCN_BRIDGE_URL: http://172.16.238.50:8090
-            OCN_NODE_URL: http://172.16.238.20:8080
-            OCN_IDENTITY: '0x659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63'
-            OCN_NODE_KEY: randomkey
-            EV_REGISTRY_ADDRESS: '0x9FBDa871d559710256a2502A2517b794B482Db40'
-            EV_REGISTRY_PROVIDER: http://172.16.238.10:8544
-            DE_EVM_API_TOKEN: "Token 1f590e5cbe12acf5a781be66e7a5e4f7e854b9e682ae83983f0aafb0e0a64e24"
-            ASSET_CACHE_SERVER_URL: "https://identitycache-dev.energyweb.org/"
-            USER_CACHE_SERVER_URL: "https://identitycache-dev.energyweb.org/"
-            NATS_SERVER_URL: "identityevents-dev-nats.energyweb.org"
-        command: ['./wait-for-node.dev.sh']
-     
+            OCN_BRIDGE_NODE_URL: http://172.16.238.20:8080
+            OCN_BRIDGE_NODE_KEY: randomkey
+            OCN_BRIDGE_DRY_RUN: 'false'
+            OCN_BRIDGE_SIGNER: '0x659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63'
+            OCN_BRIDGE_COUNTRY_CODE: DE
+            OCN_BRIDGE_PARTY_ID: FLX
+            OCN_BRIDGE_NETWORK: docker
+            OCN_BRIDGE_PERMISSIONS: '6' # comma-separated integers
+            TYPEORM_CONNECTION: postgres
+            TYPEORM_HOST: '172.16.238.51'
+            TYPEORM_USERNAME: postgres
+            TYPEORM_PASSWORD: postgres
+            TYPEORM_DATABASE: postgres
+            TYPEORM_PORT: 5432
+            TYPEORM_SYNCHRONIZE: 'true'
+            TYPEORM_LOGGING: 'false'
+
 networks:
     # should all run within network with only flex-backend ports exposed
     elia-dev-net:
