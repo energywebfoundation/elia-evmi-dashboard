@@ -79,6 +79,9 @@ metamask account and requesting a role claim (e.g. TSO).
 To view your MSP/CPO devices, import their private key (see compose script)
 into metamsk and sign up/in.
 
+Note that ev-dashboard-backend/-frontend have hot reloading so you don't need
+to reload the compose network. 
+
 Diagram of dev setup on local machine:
 ```
                            +-----------------------+

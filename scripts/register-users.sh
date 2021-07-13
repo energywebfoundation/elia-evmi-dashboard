@@ -21,8 +21,8 @@ ev-cli add-user \
   --ev-registry-address 0x9FBDa871d559710256a2502A2517b794B482Db40 \
   --provider-url http://localhost:8544
 
-echo '- CPO added to EV Dashboard Registry'
+echo 'CPO added to EV Dashboard Registry'
 
 curl -XPOST localhost:8111/partners -H 'Content-Type: application/json' -d '{"countryCode": "DE", "partyId": "EVC", "type": "cpo"}'
 
-echo 'CPO tracking by EV Dashboard set'
+echo ' - CPO tracking by EV Dashboard set'

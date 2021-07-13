@@ -151,7 +151,7 @@ services:
                 ipv4_address: 172.16.238.50
         environment:
             SERVER_PORT: 3000
-            LOG_LEVEL: info
+            LOG_LEVEL: debug
             OCN_BRIDGE_PORT: 8090
             OCN_BRIDGE_URL: http://172.16.238.50:8090
             OCN_BRIDGE_NODE_URL: http://172.16.238.20:8080
