@@ -80,15 +80,11 @@ services:
         container_name: msp-simulation
         build:
             context: ../ocn-tools
-            dockerfile: Dockerfile.dev
+            dockerfile: Dockerfile
         image: ocn-tools
         restart: always
         depends_on:
             - ocn-node
-        volumes:
-            - type: bind
-              source: ../ocn-tools/src
-              target: /home/node/app/src
         networks:
             elia-dev-net:
                 ipv4_address: 172.16.238.30
@@ -97,22 +93,18 @@ services:
             OCN_IDENTITY: '0x49b2e2b48cfc25fda1d1cbdb2197b83902142c6da502dcf1871c628ea524f11b'
             OCN_NODE_KEY: randomkey
             OCN_STAGE: docker
-        command: ['./wait-for-node.dev.sh', 'start-msp']
+        command: ['./wait-for-node.dev.sh', '--msp']
 
     cpo-simulation:
         # cpo providing access to charge points (depends on ocn-tools repository)
         container_name: cpo-simulation
         build:
             context: ../ocn-tools
-            dockerfile: Dockerfile.dev
+            dockerfile: Dockerfile
         image: ocn-tools
         restart: always
         depends_on:
             - ocn-node
-        volumes:
-            - type: bind
-              source: ../ocn-tools/src
-              target: /home/node/app/src
         networks:
             elia-dev-net:
                 ipv4_address: 172.16.238.40
@@ -121,7 +113,7 @@ services:
             OCN_IDENTITY: '0x737f5c61de545d32059ce6d5bc72f7d34b9963310adde62ef0f26621266b65dc'
             OCN_NODE_KEY: randomkey
             OCN_STAGE: docker
-        command: ['./wait-for-node.dev.sh', 'start-cpo']
+        command: ['./wait-for-node.dev.sh', '--cpo']
 
     ev-dashboard-backend-db:
         image: postgres:latest
@@ -170,6 +162,8 @@ services:
             OCN_BRIDGE_PARTY_ID: FLX
             OCN_BRIDGE_NETWORK: docker
             OCN_BRIDGE_PERMISSIONS: '6' # comma-separated integers
+            EV_REGISTRY_PROVIDER: http://172.16.238.10:8544
+            EV_REGISTRY_ADDRESS: '0x9fbda871d559710256a2502a2517b794b482db40'
             TYPEORM_CONNECTION: postgres
             TYPEORM_HOST: '172.16.238.51'
             TYPEORM_USERNAME: postgres
@@ -178,6 +172,33 @@ services:
             TYPEORM_PORT: 5432
             TYPEORM_SYNCHRONIZE: 'true'
             TYPEORM_LOGGING: 'false'
+
+
+    # Enabling these cause OOM errors
+
+    # msp-asset-client:
+    #     container_name: ev-dashboard-client-msp
+    #     build:
+    #         context: ../ev-dashboard-client/apps/asset-operator-server
+    #         dockerfile: Dockerfile.dev
+    #     networks:
+    #         elia-dev-net:
+    #             ipv4_address: 172.16.238.31
+    #     ports:
+    #         - 8300:8080
+    #     command: [ 'ts-node', './src/index.ts', './config/ev-client-config-msp.json' ]
+
+    # cpo-asset-client:
+    #     container_name: ev-dashboard-client-cpo
+    #     build:
+    #         context: ../ev-dashboard-client/apps/asset-operator-server
+    #         dockerfile: Dockerfile.dev
+    #     networks:
+    #         elia-dev-net:
+    #             ipv4_address: 172.16.238.41
+    #     ports:
+    #         - 8400:8080
+    #     command: [ 'ts-node', './src/index.ts', './config/ev-client-config-cpo.json' ]
 
 networks:
     # should all run within network with only flex-backend ports exposed

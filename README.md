@@ -4,63 +4,96 @@ Scripts and infrastructure config for Flex, OCN components used in the Elia
 PoC.
 
 ## Maintainer
-- Adam Staveley (`@adamstaveley`)
+ - Adam Staveley (`@adamstaveley`)
+ - John Henderson (`@jrhender`)
 
 
 ## Usage
 
+Clone this repository and follow the instructions below.
+
+### Install dependencies
+
+Run the script to clone required repositories and initial setup.
+```
+sh ./setup.sh
+```
+
 ### Dev environment
 
-Use the `docker-compose.dev.yml` config to spin up a local blockchain, OCN and
+Use the `docker-compose.yml` config to spin up a local blockchain, OCN and
 Flex backend for development.
 
-You should have a directory containing `elia-poc`, `flex-backend`, `ocn-tools` and `iam-cache-server`:
+```
+docker-compose up
+```
+
+This will take a while and can sometimes fail because contracts aren't deployed
+in time for services that require them, if so just restart).
+
+Once stable (i.e. ev-dashboard-backend and msp/cpo are running - not `waiting for
+service up`), you can register users to the EV Dashboard in another shell:
+```
+sh ./register-users.sh
+```
+
+Then you can register assets. The MSP/CPO has pre-configured assets, you just
+need to create DIDs for their a given device UID.
+
 ```sh
-git clone git@github.com:energywebfoundation/elia-poc.git
-git clone --branch ocn-bridge-component git@github.com:energywebfoundation/flex-backend.git
-git clone --branch ev-dashboard-simulators git@github.com:energywebfoundation/ocn-tools.git
-git clone git@github.com:energywebfoundation/iam-cache-server.git
-``` 
+# Vehicle UIDs
+# 72583848
+# 11352301
+# 60782358
+# 69695442
+# 15465960
+# 18777250
+# 78959199
+# 59748565
+# 87007039
+# 46014426
 
-Additionally the `ocn-tools` repository needs minor setup:
-```sh
-cd ocn-tools
-cp src/config/config.docker.ts src/config/config.ts
+sh ./scripts/register-vehicle.sh 72583848
+
+# Charge Point UIDs
+# CH-CPO-S9E100001
+# CH-CPO-S9E100002
+# CH-CPO-S10E100001
+# CH-CPO-S10E100002
+# CH-CPO-S11E100001
+# CH-CPO-S11E100002
+# CH-CPO-S12E100001
+# CH-CPO-S12E100002
+sh ./register-charge-point.sh CH-CPO-S9E100001
 ```
 
-Next, setup the `iam-cache-server` for development as per its README.
-
-Once ready, run `docker-compose` to start up the iam-cache-server and elia-poc:
-
+Now run the frontend:
 ```
-cd iam-cache-server
-docker-compose -f docker-compose.dev.yml up
-cd -
-docker-compose -f docker-compose.dev.yml up
+cd ../ev-dashboard-frontend
+npm start
 ```
 
-After docker compose setup is running in steady-state:
-```
-chmod +x scripts/register-users.sh scripts/register-device.sh
-./register-users.sh
-./register-device.sh
-```
+You can now sign up for the EV Dashboard on http://localhost:4200 using any
+metamask account and requesting a role claim (e.g. TSO).
+
+To view your MSP/CPO devices, import their private key (see compose script)
+into metamsk and sign up/in.
 
 Diagram of dev setup on local machine:
 ```
                            +-----------------------+
                            | ev dashboard frontend |
                            +-----------+---------+-+
-+-----------------------+              |         |
-|elia-poc docker compose+<-------------+   +-----v---------------------------+
-|  ganache-cli          |                  | iam-cache-server docker compose |
-|  ocn-registry         |                  |   iam-cache-server app          |
-|  evd-registry         |                  |   nats                          |
-|  ocn node             +----------------->+   redis                         |
-|  msp simulation       |                  |   postgres                      |
-|  cpo simulation       |                  |                                 |
-|  flex backend         |                  |                                 |
-+-----------------------+                  +---------------------------------+
++-----------------------+              |
+|elia-poc docker compose+<-------------+
+|  ganache-cli          |
+|  ocn-registry         |
+|  evd-registry         |
+|  ocn node             +
+|  msp simulation       |
+|  cpo simulation       |
+|  flex backend         |
++-----------------------+
 ```
 
 
@@ -71,9 +104,9 @@ ABI and Address of contract deployed on Volta can be found in `contracts/evd-reg
 ### Scripts
 
 A mix of shell and nodeJS scripts are provided for interacting with the PoC
-infrastructure. 
+infrastructure.
 
-Before using the following scripts, make sure the following dependencies are 
+Before using the following scripts, make sure the following dependencies are
 met:
 - [jq](https://stedolan.github.io/jq/download/) is installed
 - node LTS is installed
@@ -89,8 +122,8 @@ export SSH_IDENTITY=/path/to/id_rsa
 
 #### Charging
 
-These scripts allow for starting and stopping charging sessions. They can be 
-found in the `scripts/charging` directory. 
+These scripts allow for starting and stopping charging sessions. They can be
+found in the `scripts/charging` directory.
 
 - Get MSP tokens stored in the Flex backend:
 ```sh
@@ -116,17 +149,19 @@ MSP_PRIVATE_KEY=0x123xxx789 node signatures/generate_start.js | MSP_AUTH_TOKEN=x
 - Stop a session as MSP on CPO system (same process as above):
 ```sh
 export SESSION_ID=xxx
-MSP_PRIVATE_KEY=0x123xxx789 node generate_start.js | MSP_AUTH_TOKEN=xxx sh stop_session.sh 
+MSP_PRIVATE_KEY=0x123xxx789 node generate_start.js | MSP_AUTH_TOKEN=xxx sh stop_session.sh
 ```
 
 Note the environment variable "SESSION_ID" needs to be sourced from the Flex
 backend. This can be done using the `get_session.sh` script, which returns an
 array of session objects: find the session you wish to stop (i.e. one with an
 "ACTIVE" status) and look for the the `id` field (not `_id`). We export it in
-the above example as both scripts need access to it (signing and sending the 
+the above example as both scripts need access to it (signing and sending the
 id).
 
 #### Identity
+
+> Note: deprecated, remaining only for posterity
 
 These scripts enable the creation of DIDs for business users and their
 managed devices. They are available in the `scripts/identity` directory.
@@ -137,9 +172,9 @@ An example file has been provided, which you should copy:
 cp identities.example.json identities.json
 ```
 
-Populate the users array with the business users you wish to create 
+Populate the users array with the business users you wish to create
 DIDs for first. Simply add the private key, party id and country code.
-Note the private key should have funds to pay for the DID creation 
+Note the private key should have funds to pay for the DID creation
 (transaction).
 
 **Create business user DIDs**
@@ -148,7 +183,7 @@ node 00_users_create.js
 ```
 
 The script will save the newly created DIDs in `identities.json` for each
-entry in the "users" array. Note it will skip the operation if a DID 
+entry in the "users" array. Note it will skip the operation if a DID
 already exists for the user.
 
 **Resolve user DID documents**
@@ -160,7 +195,7 @@ node 01_users_resolve.js
 
 **Create DIDs for DERs**
 
-First we must fetch the devices over the OCN. We can do that with the 
+First we must fetch the devices over the OCN. We can do that with the
 shell scripts in the `charging` directory. We want to place our cached
 data in the `identity` directory for our DID script to read it.
 
