@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-read signature
+signature=$(node signatures/generate_stop.js)
 
 curl --location --request POST 'https://device-ev-dashboard.energyweb.org/ocpi/receiver/2.2/commands/STOP_SESSION' \
     --header "authorization: Token $MSP_AUTH_TOKEN" \
