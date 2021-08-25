@@ -3,3 +3,4 @@ scripts/identity/*.json
 !scripts/identity/identites.example.json
 .vscode
 keymanager.db
+.env

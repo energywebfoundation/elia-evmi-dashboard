@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-read signature
+signature=$(node signatures/generate_start.js)
 
 curl --location --request POST 'https://device-ev-dashboard.energyweb.org/ocpi/receiver/2.2/commands/START_SESSION' \
     --header "authorization: Token $MSP_AUTH_TOKEN" \
@@ -17,7 +17,7 @@ curl --location --request POST 'https://device-ev-dashboard.energyweb.org/ocpi/r
         "token": {
             "country_code": "DE",
             "party_id": "EVM",
-            "uid": "0102030405",
+            "uid": "65658986",
             "type": "APP_USER",
             "contract_id": "XX-12345",
             "issuer": "Test MSP",
@@ -25,6 +25,6 @@ curl --location --request POST 'https://device-ev-dashboard.energyweb.org/ocpi/r
             "whitelist": "ALWAYS",
             "last_updated": "2019-08-13T14:44:25.561Z"
         },
-        "location_id": "Loc1",
-        "evse_uid": "CH-CPO-S1E100001"
+        "location_id": "Loc13",
+        "evse_uid": "CH-CPO-S13E100001"
     }'
