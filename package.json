@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Energy Web",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@ew-did-registry/claims": "prerelease",
     "@ew-did-registry/did-document": "prerelease",
