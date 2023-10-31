@@ -1,4 +1,4 @@
-# Elia PoC
+# Elia Electric Vehicle Market Integration Dashboard
 
 Scripts and infrastructure config for Flex, OCN components used in the Elia Electric Vehicle Market Integration Dashboard.
 
