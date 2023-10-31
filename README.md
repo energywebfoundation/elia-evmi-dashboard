@@ -1,7 +1,6 @@
 # Elia PoC
 
-Scripts and infrastructure config for Flex, OCN components used in the Elia
-PoC.
+Scripts and infrastructure config for Flex, OCN components used in the Elia Electric Vehicle Market Integration Dashboard.
 
 ## Maintainer
 - Adam Staveley (`@adamstaveley`)
