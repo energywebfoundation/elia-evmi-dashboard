@@ -61,3 +61,13 @@ services:
       OCN_IDENTITY: cpo_private_key
       OCN_TOKEN_A: cpo_token_a
     command: ["./wait-for-node.sh", "--cpo"]
+  
+  oem-service:
+    build:
+      context: ./ev-dashboard-client/apps/oem-data-service
+      dockerfile: Dockerfile
+    image: "ev_device_oem_service"
+    container_name: oem_service
+    restart: always
+    ports:
+      - 4000:4000
